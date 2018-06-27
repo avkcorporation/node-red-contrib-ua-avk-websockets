@@ -1,0 +1,192 @@
+<script type="text/javascript">
+
+    function ws_oneditprepare() {
+        /*
+        if(this.client) {
+         $("#node-input-mode").val('client').change();
+        }
+        */
+    }
+
+    function ws_oneditsave() {
+
+    }
+
+    function ws_label() {
+        _type = '';
+        if(this.type == 'ua-avk-websockets-in') {
+            _type = 'ws-in';
+        }
+        if(this.type == 'ua-avk-websockets-out') {
+            _type = 'ws-out';
+        }
+        if(this.type == "ua-avk-websockets-client") {
+            return this.name||'n/a';
+        }
+        return this.name||_type;
+    }
+
+    function ws_validateclient() {
+        /*
+        if($("#node-input-mode").val() === 'client' || (this.client && !this.server)) {
+        return RED.nodes.node(this.client) != null;
+        }
+        else {
+        return true;
+        }
+        */
+        return true;
+    }
+
+    RED.nodes.registerType('ua-avk-websockets-in', {
+        category: 'ua avk websocket',
+        paletteLabel: 'ws-in',
+        defaults: {
+            name: {value: ''},
+            client: {type:"ua-avk-websockets-client", validate: ws_validateclient}
+        },
+        color:"#1BC17A",
+        inputs:0,
+        outputs:1,
+        icon: "white-globe.png",
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        label: ws_label,
+        oneditsave: ws_oneditsave,
+        oneditprepare: ws_oneditprepare
+    });
+
+
+    RED.nodes.registerType('ua-avk-websockets-out',{
+        category: 'ua avk websocket',
+        paletteLabel: 'ws-out',
+        defaults: {
+            name: {value: ''},
+            client: {type: "ua-avk-websockets-client", validate: ws_validateclient}
+        },
+        color:"#1BC17A",
+        inputs:1,
+        outputs:0,
+        icon: "white-globe.png",
+        align: "right",
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        label: ws_label,
+        oneditsave: ws_oneditsave,
+        oneditprepare: ws_oneditprepare
+    });
+
+
+    RED.nodes.registerType('ua-avk-websockets-client',{
+        category: 'config',
+        defaults: {
+            name: { value: ''},
+            path: {value: ''},//, validate:RED.validators.regex(/^((?!\/debug\/ws).)*$/) },
+            username: {value: ''},
+            password: {value: ''},
+            protocol: {value: ''}
+        },
+        inputs:0,
+        outputs:0,
+        label: ws_label
+    });
+
+</script>
+
+
+
+<!-- WebSocket Input Node - Read -->
+<script type="text/x-red" data-template-name="ua-avk-websockets-in">
+    <div class="form-row" id="websocket-client-row">
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> <span>Connection</span></label>
+        <input type="text" id="node-input-client">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="ua-avk-websockets-in">
+    <p>WebSocket read event node.</p>
+    <p>msg.payload will contain the message from sender</p>
+</script>
+
+
+
+
+<!-- WebSocket out Node - Write -->
+<script type="text/x-red" data-template-name="ua-avk-websockets-out">
+    <div class="form-row" id="websocket-client-row">
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> <span>Connection</span></label>
+        <input type="text" id="node-input-client">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="ua-avk-websockets-out">
+    <p>WebSocket write node.</p>
+    <p>This node will write the msg in payload to the recipient.</p>.
+</script>
+
+
+
+
+
+<!-- WebSocket Server configuration node -->
+<script type="text/x-red" data-template-name="ua-avk-websockets-client">
+    <div class="form-row">
+        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> Url</label>
+        <input type="text" id="node-config-input-path" placeholder="ws://host:port">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-username"><i class="fa fa-tag"></i> <span>User</span></label>
+        <input type="text" id="node-input-username" placeholder="User">
+    </div>
+    <div class="form-row">
+        <label for="node-input-password"><i class="fa fa-tag"></i> <span>Password</span></label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-protocol"><i class="fa fa-tag"></i> <span>Protocol</span></label>
+        <input type="text" id="node-input-protocol" placeholder="Protocol">
+    </div>
+
+
+    <div class="form-tips">
+        <p>The url of WebSocket Server is:<br>
+            <b>ws://host:port/path</b></p>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="ua-avk-websockets-client">
+    <p>This configuration node connects to a WebSocket Server on the specified URL.
+        <br /><br />
+        The url of WebSocket Server is:<br>
+        <b>wss://host:port/specified/path</b></p>
+    <br /><br />
+   <p>Example:
+       <br>
+       Url: somebody.com
+       <br>
+       Name: Somebody string
+       <br>
+       User: login
+       <br>
+       Password: pswd
+       <br>
+       Protocol: json-somebody.com
+       <br>
+   </p>
+</script>
+
