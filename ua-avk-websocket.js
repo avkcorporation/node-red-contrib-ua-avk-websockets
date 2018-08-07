@@ -24,6 +24,15 @@ module.exports = function(RED) {
         node.closing = false;
         node.logged = false;
 
+        node.url = n.path;
+        node.username = n.username;
+        node.password = n.password;
+        node.protocol = n.protocol;
+        node.wsping = n.wsping;
+        //node.cred = n.cred;
+        //var timeout= n.wsping; //5000;
+
+
         node.setMaxListeners(100);
 
         node.pinger = setInterval(function() {
@@ -31,15 +40,19 @@ module.exports = function(RED) {
             if (node.logged) {
                 node.ping();
             }
-        }, 5000);
+        }, node.wsping);
 
         node.closing = false;
 
         function startconn() { // Connect to remote endpoint
             var id = (1 + Math.random() * 4294967295).toString(16);
             var protocols = new Array;
-            protocols[0]= protocol;
-            var path = "wss://" + username + ":" + password + "@" + url1;
+            protocols[0]= node.protocol;
+            //var path = "wss://" + username + ":" + password + "@" + url1;
+            var path = "wss://" + node.username + ":" + node.password + "@" + node.url;
+            //node.log(RED._("\n\nPATH-2: ") + path + "\n");//+ JSON.stringify(cred) + "\n");
+            //node.log(RED._("DATA: \n") + "wss://" + node.username + ":" + node.password + "@" + node.url);
+            //node.log(RED._("PING: \n") + node.wsping);
 
             //should not start connection if no server auth data
             node.logged = false;
@@ -49,17 +62,25 @@ module.exports = function(RED) {
 
             socket.on('open', function() {
                 node.emit('opened', '');
+                node.logged = true;
             });
 
+
+            socket.on('connect', function(connection) {
+                node.emit('connected', '');
+                node.logged = true;
+            });
+
+
             socket.on('close', function() {
-                //node.log(RED._("Connection closed: ") + path);
+                node.log(RED._("Connection closed: ") + path);
                 node.emit('closed');
                 node.logged = false;
                 if (!node.closing) {
                     clearTimeout(node.tout);
                     node.tout = setTimeout(function() {
                         startconn();
-                    }, 5000); // try to reconnect every 5 secs... bit fast ?
+                    }, node.wsping); // try to reconnect every 5 secs... bit fast ?
                 }
             });
 
@@ -76,9 +97,10 @@ module.exports = function(RED) {
                     clearTimeout(node.tout);
                     node.tout = setTimeout(function() {
                         startconn();
-                    }, 5000); // try to reconnect every 5 secs... bit fast ?
+                    }, node.wsping); // try to reconnect every 5 secs... bit fast ?
                 }
             });
+
         }
 
         node.on("close", function() {
@@ -113,6 +135,7 @@ module.exports = function(RED) {
     };
 
     UaAVKWebSocketClientNode.prototype.ping = function() {
+        this.log(RED._("_PING"));
         this.server.send('');
 
     };
@@ -246,30 +269,37 @@ module.exports = function(RED) {
                 text: "httpin.status.requesting"
             });
 
+            node.log(RED._("\n\nPATH-1: ") + nodePath);
             var url = nodePath || msg.cred.path;
             if (msg.cred.path && nodePath && (nodePath !== msg.cred.path)) { // revert change below when warning is finally removed
                 node.warn(RED._("common.errors.nooverride"));
             }
+            /*
             if (!url) {
                 node.error(RED._("httpin.errors.no-url"), msg);
                 node.emit('erro');
                 return;
             }
+            */
 
-            url1 = msg.cred.path;
-            username = msg.cred.username;
-            password = msg.cred.password;
-            protocol = msg.cred.protocol;
+            //url1 = (msg.cred.path)?msg.cred.path:null;
+            //username = (msg.cred.username)?msg.cred.username:null;
+            //password = msg.cred.password;
+            //protocol = msg.cred.protocol;
+            //timeout =  msg.wsping;
 
 
             if (msg.hasOwnProperty("payload") && node.serverConfig && node.serverConfig.logged) {
                 var payload = Buffer.isBuffer(msg.payload) ? msg.payload : RED.util.ensureString(msg.payload);
                 var subject = msg.topic ? msg.topic : payload;
+                node.log(RED._("\n\nSUBJECT-1: ") + subject);
                 this.serverConfig.send_msg(subject);
 
             } else {
+                node.log(RED._("\n\nSUBJECT-2: ") + JSON.stringify(msg.payload));
+                //this.serverConfig.send_msg(msg.payload);
+                //this.serverConfig.send_msg(Buffer.from(msg.payload));
                 this.serverConfig.send_msg(JSON.stringify(msg.payload));
-
             }
 
         });
