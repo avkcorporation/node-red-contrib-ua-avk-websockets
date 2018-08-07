@@ -86,7 +86,8 @@
             path: {value: ''},//, validate:RED.validators.regex(/^((?!\/debug\/ws).)*$/) },
             username: {value: ''},
             password: {value: ''},
-            protocol: {value: ''}
+            protocol: {value: ''},
+            wsping: {value: ''}
         },
         inputs:0,
         outputs:0,
@@ -150,16 +151,21 @@
     </div>
 
     <div class="form-row">
-        <label for="node-input-username"><i class="fa fa-tag"></i> <span>User</span></label>
-        <input type="text" id="node-input-username" placeholder="User">
+        <label for="node-config-input-username"><i class="fa fa-tag"></i> <span>User</span></label>
+        <input type="text" id="node-config-input-username" placeholder="User">
     </div>
     <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-tag"></i> <span>Password</span></label>
-        <input type="password" id="node-input-password" placeholder="Password">
+        <label for="node-config-input-password"><i class="fa fa-tag"></i> <span>Password</span></label>
+        <input type="password" id="node-config-input-password" placeholder="Password">
     </div>
     <div class="form-row">
-        <label for="node-input-protocol"><i class="fa fa-tag"></i> <span>Protocol</span></label>
-        <input type="text" id="node-input-protocol" placeholder="Protocol">
+        <label for="node-config-input-protocol"><i class="fa fa-tag"></i> <span>Protocol</span></label>
+        <input type="text" id="node-config-input-protocol" placeholder="Protocol">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-wsping"><i class="fa fa-tag"></i> <span>Ping</span></label>
+        <input type="text" id="node-config-input-wsping" placeholder="ping (ms)">
     </div>
 
 
